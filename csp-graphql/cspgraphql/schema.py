@@ -1,7 +1,8 @@
 import strawberry
 import typing
 import datetime
-
+import asyncio
+from cspdatabaseresolvers import main as cspdatabaseresolvers
 
 @strawberry.type
 class User:
@@ -34,10 +35,15 @@ class Trip:
     location: [Location]
 
 
+async def user(self) -> User:
+    output = cspdatabaseresolvers.resolveUser(username = "Patrick")
+    print(output)
+    return User(username = output["username"], passwordhash = output["passwordhash"])
+
+
 @strawberry.type
 class Query:
-    @strawberry.field
-    def user(self) -> User:
-        return User(name="Patrick", age=100)
+    user: str = strawberry.field(resolver=user)
+
 
 schema = strawberry.Schema(query=Query)

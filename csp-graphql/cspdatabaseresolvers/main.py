@@ -17,11 +17,11 @@ Example config
 }
 """
 
-config = json.loads(str(open(f'{Path.home()}/csp/config.json', 'r').read()))
-connectionstring = f"dbname={config['database']} user={config['username']} password={config['username']}"
+config = json.loads(str(open(f'{Path.home()}/csp/config.json', 'r').read())) #load config
+connectionstring = ''.join([f'{x}={y} ' for x, y in zip(config.keys(), config.values())]) #dict to key value list
 connection = psycopg.connect(connectionstring)
 
 
 def resolveUser(username: str):
-	output = connection.cursor().execute(f"SELECT * FROM csp.USER where username = {username}").fetchone()
-	return {"username": username, "passwordhash": "fdasfdsaf"}
+	query = connection.cursor().execute(f"SELECT * FROM csp.USER where username = {username}")
+	return {x.name: y for x, y in zip(query.description, query.fetchone())}

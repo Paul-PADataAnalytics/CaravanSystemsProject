@@ -18,9 +18,10 @@ Example config
 """
 
 config = json.loads(str(open(f'{Path.home()}/csp/config.json', 'r').read()))
-connectionstring = f"dbname={config.database} user={config.username} password={config.username}"
-connection = psycopg.connect("dbname=test user=postgres")
+connectionstring = f"dbname={config['database']} user={config['username']} password={config['username']}"
+connection = psycopg.connect(connectionstring)
 
 
 def resolveUser(username: str):
-    return {"username": username, "passwordhash": "fdasfdsaf"}
+	output = connection.cursor().execute(f"SELECT * FROM csp.USER where username = {username}").fetchone()
+	return {"username": username, "passwordhash": "fdasfdsaf"}

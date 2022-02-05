@@ -1,6 +1,10 @@
 #!/bin/bash
+if [ -z ${1+x} ]; then
+	echo "startdatabase.sh create|restart|onlystart"
+	exit 1
+fi
 if [ $1 = "create" ]; then
-	docker build --tag cspdatabase:latest cspbackend
+	docker build --tag cspdatabase:latest csp-backend
 	docker volume create cspdatabase
 fi
 if [ $1 = "restart" ]; then

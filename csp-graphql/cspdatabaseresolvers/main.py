@@ -3,6 +3,7 @@ import asyncio
 import json
 import typing
 from pathlib import Path
+import datetime
 
 """
 Config is pulled from /home/csp/config.json
@@ -21,7 +22,12 @@ config = json.loads(str(open(f'{Path.home()}/csp/config.json', 'r').read())) #lo
 connectionstring = ''.join([f'{x}={y} ' for x, y in zip(config.keys(), config.values())]) #dict to key value list
 connection = psycopg.connect(connectionstring)
 
-
-def resolveUser(username: str):
-	query = connection.cursor().execute(f"SELECT * FROM csp.USER where username = {username}")
+def masterresolver(schema: str, table: str, field: str, value):
+	command = f"SELECT * FROM csp.{table} where {field} = "
+	query = connection.cursor().execute(command)
+	if type(value) == str:	command = command + f"'{value}'"
+	else:					command = command + f"{value}"
 	return {x.name: y for x, y in zip(query.description, query.fetchone())}
+
+def cspresolver(table: str, field: str, value):
+	return masterresolver("csp", table, field, value)

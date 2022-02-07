@@ -24,10 +24,11 @@ connection = psycopg.connect(connectionstring)
 
 def masterresolver(schema: str, table: str, field: str, value):
 	command = f"SELECT * FROM csp.{table} where {field} = "
-	query = connection.cursor().execute(command)
 	if type(value) == str:	command = command + f"'{value}'"
 	else:					command = command + f"{value}"
-	return {x.name: y for x, y in zip(query.description, query.fetchone())}
+	query = connection.cursor().execute(command)
+	return [{x.name: y
+	           for x, y in zip(query.description, x)} for x in query.fetchall()]
 
 def cspresolver(table: str, field: str, value):
 	return masterresolver("csp", table, field, value)

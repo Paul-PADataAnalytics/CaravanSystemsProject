@@ -27,7 +27,7 @@ class Location:
     lat: str = '0'
     lng: str = '0'
     name: str = 'Unknown Location'
-    rating: (LocationRating) = None
+    rating: typing.List[LocationRating] = None
     created: datetime.date = '2001-01-01'
     updated: datetime.date = '2001-01-01'
     deleted: str = 'N'
@@ -40,7 +40,7 @@ class Trip:
     enddate: datetime.date = '2001-01-01'
     bookinguserid: int = 0
     triplocationid: int = 0
-    location: (Location) = None
+    location: typing.List[Location] = None
     created: datetime.date = 0
     updated: datetime.date = 0
     deleted: str = 'N'
@@ -68,15 +68,15 @@ async def getTrips(tripid: int = 0, userid: str = "", startdate: str = "") -> ty
     if tripid != 0:     fetch = db.cspresolver("trip", "id", tripid)
     if userid != "":    fetch = db.cspresolver("trip", "bookinguserid", userid)
     if startdate != "": fetch = db.cspresolver("trip", "startdate", startdate)
-    # for x in fetch:
-    #     x["trips"] = getLocations(id = x["triplocationid"])
+    for x in fetch:
+        x["location"] = getLocations(id = x["triplocationid"])
     return [Trip(**fetched) for fetched in fetch]
 
 
-async def getLocations(id: int = 0) -> typing.List[Location()]:
+async def getLocations(id: int = 0) -> typing.List[Location]:
     fetch = db.cspresolver("location", "id", id)
-    # for x in fetch:
-    #     fetch["rating"] = db.cspresolver("locationrating", "locationid", id)
+    for x in fetch:
+        x["rating"] = [LocationRating(**y) for y in db.cspresolver("locationrating", "locationid", x["id"])]
     return [Location(**fetched) for fetched in fetch]
 
 @strawberry.type

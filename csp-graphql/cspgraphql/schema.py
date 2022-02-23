@@ -4,7 +4,7 @@ import typing
 import datetime
 # import asyncio
 from cspdatabaseresolvers import main as db
-
+import csp
 
 @strawberry.type
 class LocationRating:
@@ -57,6 +57,7 @@ class User:
     trips: typing.List[Trip] = None
 
 
+@strawberry.type
 class credentials:
     userid: int = 0
     username: str = ""
@@ -65,42 +66,42 @@ class credentials:
     expiresin: datetime.date = '2001-01-01'
 
 
-async def getUser(username: str) -> typing.List[User]:
+def getUser(username: str) -> typing.List[User]:
     fetch = db.cspresolver("user", "username", username)
     for x in fetch:
         x["trips"] = getTrips(userid=x["id"])
-    return await [User(**fetched) for fetched in fetch]
+    return [User(**fetched) for fetched in fetch]
 
 
-async def getTrips(tripid: int = 0, userid: str = "", startdate: str = "") -> typing.List[Trip]:
+def getTrips(tripid: int = 0, userid: str = "", startdate: str = "") -> typing.List[Trip]:
     if tripid != 0:     fetch = db.cspresolver("trip", "id", tripid)
     if userid != "":    fetch = db.cspresolver("trip", "bookinguserid", userid)
     if startdate != "": fetch = db.cspresolver("trip", "startdate", startdate)
     for x in fetch:
         x["location"] = getLocations(id=x["triplocationid"])
-    return await [Trip(**fetched) for fetched in fetch]
+    return [Trip(**fetched) for fetched in fetch]
 
 
-async def getLocations(id: int = 0) -> typing.List[Location]:
+def getLocations(id: int = 0) -> typing.List[Location]:
     fetch = db.cspresolver("location", "id", id)
     for x in fetch:
         x["rating"] = [LocationRating(**y) for y in db.cspresolver("locationrating", "locationid", x["id"])]
-    return await [Location(**fetched) for fetched in fetch]
+    return [Location(**fetched) for fetched in fetch]
 
 @strawberry.type
 class Query:
     @strawberry.field
     def user(self, info: Info, username: strawberry.ID) -> typing.List[User]:
         return getUser(username=username)
-    
+
     @strawberry.field
     def trip(self, info, userid: strawberry.ID = 0, triplocationid: int = 0, startdate: str = "") -> typing.List[Trip]:
         return getTrips(tripid=triplocationid, userid=userid, startdate=startdate)
-        
-    @strawberry.field  
+
+    @strawberry.field
     def login(self, info, username: str, password: str) -> credentials:
         pass
-    
+
     # @strawberry.field
     # def location(self, info, tripid: strawberry.ID) -> Location:
     #     fetch = db.cspresolver("location", "id", tripid)

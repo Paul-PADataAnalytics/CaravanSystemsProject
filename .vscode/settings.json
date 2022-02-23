@@ -10,5 +10,7 @@
             "username": "postgres",
             "password": "abc123"
         }
-    ]
+    ],
+    "python.linting.flake8Enabled": true,
+    "python.linting.enabled": true
 }
